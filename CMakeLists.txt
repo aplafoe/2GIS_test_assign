@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_SOURCES
     wordcount.h
+    fileworker.h
+    fileworker.cpp
     wordcount.cpp
     main.cpp
 )
@@ -26,6 +28,7 @@ qt_add_qml_module(appFilesWordRating
     VERSION 1.0
     QML_FILES Main.qml
     SOURCES wordcount.h wordcount.cpp
+    SOURCES fileworker.h fileworker.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -42,6 +45,7 @@ set_target_properties(appFilesWordRating PROPERTIES
 target_link_libraries(appFilesWordRating PRIVATE
     Qt6::Quick
     Boost::multi_index
+    Boost::container
 )
 
 include(GNUInstallDirs)

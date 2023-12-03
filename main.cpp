@@ -3,6 +3,8 @@
 #include <QFile>
 #include <QTextStream>
 
+#include <boost/container/static_vector.hpp>
+
 #include "wordcount.h"
 
 int main(int argc, char *argv[])
@@ -30,10 +32,17 @@ int main(int argc, char *argv[])
         qDebug() << "Error";
     }
 
-    std::array<const QString*, 15> topWordsArray;
+    boost::container::static_vector<QString, 15> vec;
 
-    auto& byCount = container.get<ByCount>();
-    auto end = byCount.begin();
+    auto& top = container.get<ByCount>();
+
+    std::transform(top.begin(), std::next(top.begin(), 15), std::back_insert_iterator{vec}, [](const WordCount& lhs) {return lhs.word;});
+
+    for (const auto & it : vec) {
+        qDebug() << it;
+    }
+
+    /*auto end = byCount.begin();
     std::advance(end, std::min(15, static_cast<int>(byCount.size())));
 
     int i = 0;
@@ -43,7 +52,7 @@ int main(int argc, char *argv[])
 
     for (const auto& wordPtr : topWordsArray) {
         qDebug() << *wordPtr << ": " << container.find(*wordPtr)->count << '\n';
-    }
+    }*/
 
 
     /*QGuiApplication app(argc, argv);
