@@ -11,10 +11,12 @@
 #include <QThread>
 #include <QUrl>
 
-inline constexpr std::uint16_t TOP_SIZE = 15u;
+inline constexpr std::size_t REQUIRED_TOP_SIZE = 15u;
 
 struct Rate {
-    QString& word;
+    explicit Rate(const QString& word, std::uint64_t count);
+
+    const QString& word;
     std::uint64_t count = 0;
 };
 
@@ -23,16 +25,16 @@ class FileWorker : public QObject
     Q_OBJECT
 public:
     explicit FileWorker(QObject* parent = nullptr);
-    bool drawRequired() const noexcept;
 public slots:
     void doWork(const QString& fileName);
 signals:
-    void resultReady(const boost::container::static_vector<Rate, TOP_SIZE>& top);
+    void resultReady(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
+    void topUpdated(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
     void openError();
 private:
+    bool compareAndRedraw(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& currentTop) noexcept;
     WordCountContainer container;
-    boost::container::static_vector<WordCount, TOP_SIZE> previousTop;
-    boost::container::static_vector<Rate, TOP_SIZE> currentTop;
+    boost::container::static_vector<Rate, REQUIRED_TOP_SIZE> previousTop;
 };
 
 #endif // FILEWORKER_H

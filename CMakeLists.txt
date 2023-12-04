@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(FilesWordRating VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT_SOURCES
@@ -29,6 +29,7 @@ qt_add_qml_module(appFilesWordRating
     QML_FILES Main.qml
     SOURCES wordcount.h wordcount.cpp
     SOURCES fileworker.h fileworker.cpp
+    SOURCES executor.h executor.cpp
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
