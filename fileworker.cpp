@@ -10,8 +10,10 @@ FileWorker::FileWorker(QObject *parent)
 bool FileWorker::compareAndRedraw(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& currentTop) noexcept {
     for (std::size_t i = 0u; i < std::min(currentTop.size(), previousTop.size()); ++i) {
         if (currentTop.at(i).word != previousTop.at(i).word) {
+            qDebug() << "eq" << currentTop.at(i).word << currentTop.at(i).count << previousTop.at(i).word << previousTop.at(i).count;
             return true;
         }
+        //qDebug() << "not eq" << currentTop.at(i).word << currentTop.at(i).count << previousTop.at(i).word << previousTop.at(i).count;
     }
     previousTop.clear();
     std::copy(currentTop.begin(), currentTop.end(), std::back_inserter(previousTop));
@@ -36,13 +38,11 @@ void FileWorker::doWork(const QString& fileName) {
                 byWordIndex.insert(WordCount{word, 1});
             }
             auto& top = container.get<ByCount>();
-            qDebug() << top.size();
             std::transform(top.begin(), std::next(top.begin(), std::min(top.size(), REQUIRED_TOP_SIZE)), std::back_insert_iterator{currentTop},
-                           [](const WordCount& lhs) {
-                                return Rate{lhs.word, lhs.count};
-                            });
+                [] (const WordCount& lhs) {
+                    return Rate{lhs.word, lhs.count};
+            });
             if (compareAndRedraw(currentTop)) {
-                qDebug() << "Signal emitted!";
                 emit topUpdated(currentTop);
             }
         }

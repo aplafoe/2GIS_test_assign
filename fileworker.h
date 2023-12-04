@@ -8,8 +8,6 @@
 #include <QFile>
 #include <QObject>
 #include <QTextStream>
-#include <QThread>
-#include <QUrl>
 
 inline constexpr std::size_t REQUIRED_TOP_SIZE = 15u;
 
