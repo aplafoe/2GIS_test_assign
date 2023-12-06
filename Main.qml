@@ -1,17 +1,72 @@
 import QtQuick
 import QtQuick.Window
-import QtCharts
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
+import QtQuick.Dialogs
+import QtCharts
 
 Window {
     id: root
     minimumWidth: 300
-    minimumHeight: 400
+    minimumHeight: 300
     visible: true
     title: qsTr("WordRate")
     color: "#282828"
+    ChartView {
+        visible: false
+        height: parent.height - openButton.height - startButton.height - control.height - openButton.anchors.margins;
+        width: root.width
+        backgroundColor: "transparent"
+        id: view
+        legend.labelColor: "white"
+        ValuesAxis {
+            labelsColor: "white"
+            id: valueAxis
+                    min: 0
+        }
+        ValuesAxis {
+            labelsColor: "white"
+            id: valueAxisY
+            min: 0
+            max: 0
+        }
+            BarSeries {
+                axisX: BarCategoryAxis {
+                    id: cate
+                    categories: ["top15"]
+                    labelsColor: "white"
+                }
+                axisY: valueAxisY
+                   id: mySeries
+               }
+        }
+    Connections {
+        objectName: "metaReceiver"
+        target: cppBackend
+        function myQmlFunction(msg : list) : string {
+            view.visible = true;
+            mySeries.clear();
+            var categories = ["top"];
+            for (var i = 0; i < msg.length; ++i) {
+                var jsonData = JSON.parse(JSON.stringify(msg[i]));
+                mySeries.append(jsonData.word, [jsonData.count]);
+                valueAxisY.max = Math.max(jsonData.count, valueAxisY.max)
+                control.value = jsonData.percent
+            }
+            cate.categories = categories;
+        }
+    }
+    FileDialog {
+            objectName: "metaFileDialog"
+            id: fileDialog
+            title: "Open File"
+            signal fileDialogAccepted(path: string)
+            onAccepted: {
+                mySeries.clear()
+                fileDialog.fileDialogAccepted(Qt.resolvedUrl(fileDialog.selectedFile.toString().replace(/^(file:\/{3})/,"")))
+            }
+        }
     Rectangle {
         id: startButton
         width: parent.width / 2.5
@@ -19,7 +74,7 @@ Window {
         anchors.left: parent.left
         anchors.margins: 20
         height: 40
-        color: "#1d1d1d"
+        color: mouse.hovered ? "#464646" : "#1d1d1d"
         radius: 10
         Text {
             anchors.centerIn: parent
@@ -30,8 +85,18 @@ Window {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                console.log("Button clicked!")
+                cppBackend.clicked()
             }
+        }
+        HoverHandler {
+            id: stylus
+            acceptedDevices: PointerDevice.Stylus
+            cursorShape: Qt.CrossCursor
+        }
+        HoverHandler {
+            id: mouse
+            acceptedDevices: PointerDevice.Mouse
+            cursorShape: Qt.PointingHandCursor
         }
     }
     Rectangle {
@@ -41,7 +106,7 @@ Window {
         anchors.right: parent.right
         anchors.margins: 20
         height: 40
-        color: "#1d1d1d"
+        color: mouse1.hovered ? "#464646" : "#1d1d1d"
         radius: 10
         Text {
             anchors.centerIn: parent
@@ -55,6 +120,16 @@ Window {
                 console.log("Button clicked!")
             }
         }
+        HoverHandler {
+            id: stylus1
+            acceptedDevices: PointerDevice.Stylus
+            cursorShape: Qt.CrossCursor
+        }
+        HoverHandler {
+            id: mouse1
+            acceptedDevices: PointerDevice.Mouse
+            cursorShape: Qt.PointingHandCursor
+        }
     }
     Rectangle {
         id: openButton
@@ -63,7 +138,7 @@ Window {
         y: startButton.y - height * 1.25
         x: startButton.x
         height: 40
-        color: "#1d1d1d"
+        color: mouse2.hovered ? "#464646" : "#1d1d1d"
         radius: 10
         Text {
             anchors.centerIn: parent
@@ -74,8 +149,18 @@ Window {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                console.log("Button clicked!")
+                fileDialog.open()
             }
+        }
+        HoverHandler {
+            id: stylus2
+            acceptedDevices: PointerDevice.Stylus
+            cursorShape: Qt.CrossCursor
+        }
+        HoverHandler {
+            id: mouse2
+            acceptedDevices: PointerDevice.Mouse
+            cursorShape: Qt.PointingHandCursor
         }
     }
     Rectangle {
@@ -85,7 +170,7 @@ Window {
         y: cancelButton.y - height * 1.25
         x: cancelButton.x
         height: 40
-        color: "#1d1d1d"
+        color: mouse4.hovered ? "#464646" : "#1d1d1d"
         radius: 10
         Text {
             anchors.centerIn: parent
@@ -99,90 +184,31 @@ Window {
                 console.log("Button clicked!")
             }
         }
-    }
-    Text {
-        id: firstLegendText
-        x: (root.width - width) / 2
-        y: pauseButton.y - 130
-        text: "FirstWord"
-        font.pixelSize: 20
-        color: "#ffffff"
-    }
-    Rectangle {
-        id: firstLegendIcon
-        width: 30
-        y: firstLegendText.y
-        x: firstLegendText.x - width * 1.2
-        height: 30
-        color: "#1d1d1d"
-        radius: 10
-    }
-    Text {
-        id: secondLegendText
-        x: firstLegendText.x
-        y: firstLegendText.y + 40
-        text: "SecondWord"
-        font.pixelSize: 20
-        color: "#ffffff"
-    }
-    Rectangle {
-        id: secondLegendIcon
-        width: 30
-        y: secondLegendText.y
-        x: secondLegendText.x - width * 1.2
-        height: 30
-        color: "#123456"
-        radius: 10
-    }
-    Text {
-        id: thirdLegendText
-        x: firstLegendText.x
-        y: secondLegendText.y + 40
-        text: "ThirdWord"
-        font.pixelSize: 20
-        color: "#ffffff"
-    }
-    Rectangle {
-        id: thirdLegendIcon
-        width: 30
-        y: thirdLegendText.y
-        x: thirdLegendText.x - width * 1.2
-        height: 30
-        color: "#654321"
-        radius: 10
-    }
-    Rectangle {
-        id: previousPage
-        width: 20;
-        height: 20;
-        color: "#777777"
-        radius: 10
-        x: openButton.x
-        y: secondLegendIcon.y
-    }
-    Rectangle {
-        id: nextPage
-        width: 20;
-        height: 20;
-        color: "#777777"
-        radius: 10
-        x: pauseButton.x + pauseButton.width - width
-        y: secondLegendIcon.y
+        HoverHandler {
+            id: stylus4
+            acceptedDevices: PointerDevice.Stylus
+            cursorShape: Qt.CrossCursor
+        }
+        HoverHandler {
+            id: mouse4
+            acceptedDevices: PointerDevice.Mouse
+            cursorShape: Qt.PointingHandCursor
+        }
     }
     ProgressBar {
         id: control
-        value: 0.5
+        value: 0
         padding: 2
         height: 12
         width: root.width
         y: root.height - height
-            background: Rectangle {
-                implicitWidth: 200
-                implicitHeight: 6
-                color: "transparent"
-                radius: 3
-            }
-            contentItem: Item {
+        background: Rectangle {
+            implicitWidth: 200
+            implicitHeight: 6
+            color: "transparent"
+            radius: 3
+        }
+        contentItem: Item {
                 implicitWidth: 200
                 implicitHeight: 4
 
@@ -192,11 +218,6 @@ Window {
                     radius: 2
                     color: "#61FF3A"
                 }
-            }
-    }
-    Rectangle {
-        width: 100;
-        height: 100;
-        color: "red"
+        }
     }
 }

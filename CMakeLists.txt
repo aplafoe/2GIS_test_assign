@@ -15,7 +15,7 @@ set(PROJECT_SOURCES
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/deps/boost)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Widgets)
 
 qt_standard_project_setup()
 
@@ -45,6 +45,7 @@ set_target_properties(appFilesWordRating PROPERTIES
 
 target_link_libraries(appFilesWordRating PRIVATE
     Qt6::Quick
+    Qt6::Widgets
     Boost::multi_index
     Boost::container
 )

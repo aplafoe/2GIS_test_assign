@@ -7,6 +7,8 @@
 
 #include <QObject>
 #include <QThread>
+#include <QVariantList>
+#include <QVariantMap>
 
 class Executor : public QObject
 {
@@ -19,7 +21,7 @@ public slots:
     void receiveFileName(const QString& fileName);
 signals:
     void start(const QString& fileName);
-    void sendTop(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
+    void sendTop(const QVariantList& top);
 private:
     QThread thread;
 };
