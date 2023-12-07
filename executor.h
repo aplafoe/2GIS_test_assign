@@ -17,13 +17,16 @@ public:
     explicit Executor(QObject *parent = nullptr);
     ~Executor();
 public slots:
-    void receiveTop(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
-    void receiveFileName(const QString& fileName);
+    void handleTopUpdate(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
+    void setFileName(const QString& fileName);
+    void handleError(const QString& error);
 signals:
     void start(const QString& fileName);
     void sendTop(const QVariantList& top);
+    void sendError(const QString& error);
 private:
     QThread thread;
+    FileWorker* worker;
 };
 
 #endif // EXECUTOR_H

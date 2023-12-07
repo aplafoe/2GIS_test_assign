@@ -15,29 +15,26 @@ int main(int argc, char *argv[])
 {
 
     QApplication app(argc, argv);
-
     QQmlApplicationEngine engine;
-
-    Executor ex;
 
     const QUrl url(u"qrc:/FilesWordRating/Main.qml"_qs);
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
         &app, []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
 
+    Executor ex;
     engine.rootContext()->setContextProperty("cppBackend", &ex);
     engine.load(url);
 
     auto root = engine.rootObjects();
+    auto* fileDialogItem = root.first()->findChild<QObject*>("metaFileDialog");
+    auto* signalsReceiver = root.first()->findChild<QObject*>("metaReceiver");
 
-    auto* r = root.first()->findChild<QObject*>("metaFileDialog");
-
-    auto* re = root.first()->findChild<QObject*>("metaReceiver");
-
-    QObject::connect(r, SIGNAL(fileDialogAccepted(QString)), &ex, SLOT(receiveFileName(QString)));
-
-    QObject::connect(&ex, &Executor::sendTop, re, [&re](const QVariantList& list) {
-        QMetaObject::invokeMethod(re, "myQmlFunction", Q_ARG(QVariant, QVariant::fromValue(list))); });
+    QObject::connect(fileDialogItem, SIGNAL(fileDialogAccepted(QString)), &ex, SLOT(setFileName(QString)));
+    QObject::connect(&ex, &Executor::sendTop, signalsReceiver , [&signalsReceiver ](const QVariantList& list) {
+        QMetaObject::invokeMethod(signalsReceiver, "drawChart", Q_ARG(QVariant, QVariant::fromValue(list))); });
+    QObject::connect(&ex, &Executor::sendError, signalsReceiver , [&signalsReceiver ](const QString& error) {
+        QMetaObject::invokeMethod(signalsReceiver, "showError", Q_ARG(QString, error)); });
 
     return app.exec();
 }

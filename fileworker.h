@@ -30,7 +30,7 @@ public slots:
 signals:
     void resultReady(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
     void topUpdated(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
-    void openError();
+    void openError(const QString& error);
 private:
     bool compareAndRedraw(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& currentTop) noexcept;
     WordCountContainer container;
