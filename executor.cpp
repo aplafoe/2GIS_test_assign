@@ -13,25 +13,25 @@ Executor::Executor(QObject *parent)
     thread.start();
 }
 
-void Executor::setFileName(const QString& fileName) {
-    emit start(fileName);
+void Executor::handleError(const QString& error) {
+    emit sendError(error);
 }
 
 void Executor::handleTopUpdate(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top) {
     QVariantList message;
     std::transform(top.begin(), top.end(), std::back_insert_iterator{message},
-        [](const Rate& lhs) {
-            QVariantMap map;
-            map["count"] = lhs.count;
-            map["word"] = lhs.word;
-            map["percent"] = lhs.processedPercent;
-            return map;
-    });
+                   [](const Rate& lhs) {
+                       QVariantMap map;
+                       map["count"] = lhs.count;
+                       map["word"] = lhs.word;
+                       map["percent"] = lhs.processedPercent;
+                       return map;
+                   });
     emit sendTop(message);
 }
 
-void Executor::handleError(const QString& error) {
-    emit sendError(error);
+void Executor::setFileName(const QString& fileName) {
+    emit start(fileName);
 }
 
 Executor::~Executor() {

@@ -135,6 +135,38 @@ Window {
             id: openButtonMouse
         }
     }
+    Rectangle {
+        anchors.margins: 20
+        color: pauseButtonMouse.hovered ? "#464646" : pauseButtonStylus.hovered ? "#464646" : "#1d1d1d"
+        height: 40
+        id: pauseButton
+        radius: 10
+        width: parent.width / 2.5
+        x: openButton.x
+        y: openButton.y + openButton.height + openButton.anchors.margins
+        Text {
+            anchors.centerIn: parent
+            color: "#ffffff"
+            font.pixelSize: 20
+            text: "Пауза"
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                fileDialog.open()
+            }
+        }
+        HoverHandler {
+            acceptedDevices: PointerDevice.Stylus
+            cursorShape: Qt.CrossCursor
+            id: pauseButtonStylus
+        }
+        HoverHandler {
+            acceptedDevices: PointerDevice.Mouse
+            cursorShape: Qt.PointingHandCursor
+            id: pauseButtonMouse
+        }
+    }
     ProgressBar {
         height: 12
         id: control

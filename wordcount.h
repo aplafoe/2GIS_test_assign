@@ -12,11 +12,10 @@
 #include <QString>
 
 struct WordCount {
-    explicit WordCount();
     explicit WordCount(const QString& word, std::uint64_t count);
 
-    QString word;
     std::uint64_t count = 0;
+    QString word;
 };
 
 struct QStrHasher {
