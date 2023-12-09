@@ -32,11 +32,11 @@ class FileWorker : public QObject
     Q_OBJECT
 public:
     explicit FileWorker(QObject* parent = nullptr);
-public slots:
-    void doWork(const QString& fileName);
     void pauseThread() noexcept;
     void resumeThread() noexcept;
     void cancelReading() noexcept;
+public slots:
+    void doWork(const QString& fileName);
 signals:
     void openError(const QString& error);
     void resultReady(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
