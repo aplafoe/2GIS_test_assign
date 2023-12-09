@@ -6,11 +6,18 @@
 #include <boost/container/static_vector.hpp>
 
 #include <QFile>
+#include <QMutex>
 #include <QObject>
 #include <QTextStream>
 #include <QTime>
 
 inline constexpr std::size_t REQUIRED_TOP_SIZE = 15u;
+
+enum class ThreadState {
+    Processing,
+    Paused,
+    NoWork
+};
 
 struct Rate {
     explicit Rate(const QString& word, std::uint64_t count, std::float_t processed);
@@ -27,6 +34,9 @@ public:
     explicit FileWorker(QObject* parent = nullptr);
 public slots:
     void doWork(const QString& fileName);
+    void pauseThread() noexcept;
+    void resumeThread() noexcept;
+    void cancelReading() noexcept;
 signals:
     void openError(const QString& error);
     void resultReady(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
@@ -35,6 +45,8 @@ private:
     bool compareAndRedraw(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& currentTop) noexcept;
 
     WordCountContainer container;
+    ThreadState currentState;
+    QMutex mutex;
     QTime lastEmit;
     boost::container::static_vector<Rate, REQUIRED_TOP_SIZE> previousTop;
 };

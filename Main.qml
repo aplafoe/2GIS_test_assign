@@ -4,16 +4,21 @@ import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Window
 
-Window {
+ApplicationWindow {
     color: "#282828"
     height: 400
     id: root
     title: qsTr("WordRate")
     visible: true
     width: 300
+
+    onClosing: {
+        cancelButton.cancelReading()
+    }
+
     ChartView {
         backgroundColor: "transparent"
-        height: parent.height - openButton.height - control.height - openButton.anchors.margins
+        height: parent.height - openButton.height - pauseButton.height - control.height - openButton.anchors.margins
         id: chart
         legend.labelColor: "white"
         visible: false
@@ -133,6 +138,83 @@ Window {
             acceptedDevices: PointerDevice.Mouse
             cursorShape: Qt.PointingHandCursor
             id: openButtonMouse
+        }
+    }
+    Rectangle {
+        anchors.margins: 20
+        color: pauseButtonMouse.hovered ? "#464646" : pauseButtonStylus.hovered ? "#464646" : "#1d1d1d"
+        height: 40
+        id: pauseButton
+        objectName: "pauseButtonMeta"
+        property bool isChecked: false
+        radius: 10
+        width: parent.width / 2.5
+        x: openButton.x
+        y: openButton.y - openButton.height - openButton.anchors.margins / 2
+
+        signal pauseRequired(flag: bool)
+
+        Text {
+            anchors.centerIn: parent
+            color: "#ffffff"
+            font.pixelSize: 20
+            text: pauseButton.isChecked ? "Пуск" : "Пауза"
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                pauseButton.isChecked = !pauseButton.isChecked
+                pauseButton.pauseRequired(pauseButton.isChecked)
+            }
+        }
+        HoverHandler {
+            acceptedDevices: PointerDevice.Stylus
+            cursorShape: Qt.CrossCursor
+            id: pauseButtonStylus
+        }
+        HoverHandler {
+            acceptedDevices: PointerDevice.Mouse
+            cursorShape: Qt.PointingHandCursor
+            id: pauseButtonMouse
+        }
+    }
+    Rectangle {
+        anchors.margins: 20
+        color: cancelButtonMouse.hovered ? "#464646" : cancelButtonStylus.hovered ? "#464646" : "#1d1d1d"
+        height: 40
+        id: cancelButton
+        objectName: "cancelButtonMeta"
+        radius: 10
+        width: parent.width / 2.5
+        x: startButton.x
+        y: startButton.y - startButton.height - startButton.anchors.margins / 2
+
+        signal cancelReading()
+
+        Text {
+            anchors.centerIn: parent
+            color: "#ffffff"
+            font.pixelSize: 20
+            text: "Отмена"
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                chart.visible = false
+                control.value = 0
+                series.clear();
+                cancelButton.cancelReading()
+            }
+        }
+        HoverHandler {
+            acceptedDevices: PointerDevice.Stylus
+            cursorShape: Qt.CrossCursor
+            id: cancelButtonStylus
+        }
+        HoverHandler {
+            acceptedDevices: PointerDevice.Mouse
+            cursorShape: Qt.PointingHandCursor
+            id: cancelButtonMouse
         }
     }
     ProgressBar {

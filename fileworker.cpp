@@ -4,7 +4,21 @@ Rate::Rate(const QString& word, std::uint64_t count, std::float_t processed) :
     word{word}, count {count}, processedPercent{processed} {}
 
 FileWorker::FileWorker(QObject *parent)
-    : QObject{parent}, lastEmit {QTime::currentTime()} {}
+    : QObject{parent}, lastEmit {QTime::currentTime()}, currentState(ThreadState::Processing) {}
+
+void FileWorker::pauseThread() noexcept {
+    QMutexLocker lock(&mutex);
+    currentState = ThreadState::Paused;
+}
+
+void FileWorker::resumeThread() noexcept {
+    QMutexLocker lock(&mutex);
+    currentState = ThreadState::Processing;
+}
+void FileWorker::cancelReading() noexcept {
+    QMutexLocker lock(&mutex);
+    currentState = ThreadState::NoWork;
+}
 
 bool FileWorker::compareAndRedraw(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& currentTop) noexcept {
     for (std::size_t i = 0u; i < std::min(currentTop.size(), previousTop.size()); ++i) {
@@ -29,6 +43,17 @@ void FileWorker::doWork(const QString& fileName) {
         QTextStream stream(&file);
         boost::container::static_vector<Rate, REQUIRED_TOP_SIZE> currentTop;
         while (!stream.atEnd()) {
+            mutex.lock();
+            if (currentState == ThreadState::Paused) {
+                mutex.unlock();
+                continue;
+            } else if (currentState == ThreadState::NoWork) {
+                file.close();
+                mutex.unlock();
+                return;
+            } else if (currentState == ThreadState::Processing) {
+                mutex.unlock();
+            }
             currentTop.clear();
             QString word = stream.readLine();
             if (auto iter = container.find(word); iter != container.end()) {

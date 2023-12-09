@@ -4,13 +4,15 @@ Executor::Executor(QObject *parent)
     : QObject{parent}
 {
     worker = new FileWorker;
-    worker->moveToThread(&thread);
     connect(&thread, &QThread::finished, worker, &FileWorker::deleteLater);
     connect(this, &Executor::start, worker, &FileWorker::doWork);
     connect(worker, &FileWorker::topUpdated, this, &Executor::handleTopUpdate);
     connect(worker, &FileWorker::resultReady, this, &Executor::handleTopUpdate);
     connect(worker, &FileWorker::openError, this, &Executor::sendError);
-    thread.start();
+}
+
+void Executor::cancelReading() {
+    worker->cancelReading();
 }
 
 void Executor::handleError(const QString& error) {
@@ -31,7 +33,18 @@ void Executor::handleTopUpdate(const boost::container::static_vector<Rate, REQUI
 }
 
 void Executor::setFileName(const QString& fileName) {
+    worker->resumeThread();
+    worker->moveToThread(&thread);
+    thread.start();
     emit start(fileName);
+}
+
+void Executor::togglePause(bool flag) {
+    if (flag) {
+        worker->pauseThread();
+    } else {
+        worker->resumeThread();
+    }
 }
 
 Executor::~Executor() {

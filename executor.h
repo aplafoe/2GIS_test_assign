@@ -17,9 +17,11 @@ public:
     explicit Executor(QObject *parent = nullptr);
     ~Executor();
 public slots:
+    void cancelReading();
     void handleError(const QString& error);
     void handleTopUpdate(const boost::container::static_vector<Rate, REQUIRED_TOP_SIZE>& top);
     void setFileName(const QString& fileName);
+    void togglePause(bool flag);
 signals:
     void sendError(const QString& error);
     void sendTop(const QVariantList& top);
